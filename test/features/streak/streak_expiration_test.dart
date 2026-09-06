@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-import 'package:floating_pet_overlay/features/streak/data/datasources/streak_local_datasource.dart';
-import 'package:floating_pet_overlay/features/streak/data/models/streak_model.dart';
-import 'package:floating_pet_overlay/features/streak/data/repositories/streak_repository_impl.dart';
-import 'package:floating_pet_overlay/features/streak/domain/entities/streak_entity.dart';
+import 'package:floating_streak/features/streak/data/datasources/streak_local_datasource.dart';
+import 'package:floating_streak/features/streak/data/models/streak_model.dart';
+import 'package:floating_streak/features/streak/data/repositories/streak_repository_impl.dart';
+import 'package:floating_streak/features/streak/domain/entities/streak_entity.dart';
 
 /// checkExpiration must run on startup/resume rather than depending on a
 /// background timer, and a naturally-completed timed streak must stamp

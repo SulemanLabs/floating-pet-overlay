@@ -15,7 +15,7 @@ import '../../domain/usecases/select_pet.dart';
 import '../../domain/usecases/update_custom_emoji.dart';
 
 final petLocalDataSourceProvider = Provider<PetLocalDataSource>((ref) {
-  return PetLocalDataSource(ref.watch(localStorageProvider));
+  return PetLocalDataSource(ref.watch(petHiveBoxProvider), ref.watch(localStorageProvider));
 });
 
 final petAssetStorageProvider = Provider<PetAssetStorage>((ref) => PetAssetStorage());

@@ -7,7 +7,9 @@ import 'app_text_styles.dart';
 /// Builds the light/dark [ThemeData] pair for the app from [AppColors] and
 /// [AppTextStyles]. Component themes are defined here so screens get the
 /// design system "for free" through `Theme.of(context)` rather than
-/// re-declaring styling per widget.
+/// re-declaring styling per widget. Warm pet theme: gold/orange primary with
+/// a sky blue secondary accent, on a soft cream background, with a single
+/// restrained red reserved for destructive/error states.
 class AppTheme {
   const AppTheme._();
 
@@ -20,48 +22,50 @@ class AppTheme {
 
     final colorScheme = isDark
         ? const ColorScheme.dark(
-            primary: AppColors.darkPrimaryPink,
-            onPrimary: AppColors.darkText,
+            primary: AppColors.primary,
+            onPrimary: AppColors.darkBackground,
             primaryContainer: AppColors.darkSurfaceElevated,
-            onPrimaryContainer: AppColors.darkPrimaryPink,
-            secondary: AppColors.darkAccentPink,
-            onSecondary: AppColors.darkText,
+            onPrimaryContainer: AppColors.primary,
+            secondary: AppColors.secondary,
+            onSecondary: AppColors.darkBackground,
             secondaryContainer: AppColors.darkSurfaceElevated,
-            onSecondaryContainer: AppColors.darkAccentPink,
+            onSecondaryContainer: AppColors.secondary,
             surface: AppColors.darkSurface,
             onSurface: AppColors.darkTextPrimary,
             surfaceContainerHighest: AppColors.darkSurfaceElevated,
-            onSurfaceVariant: AppColors.darkSecondaryText,
+            onSurfaceVariant: AppColors.darkTextSecondary,
             outline: AppColors.darkBorder,
-            outlineVariant: AppColors.darkBorder,
+            outlineVariant: AppColors.darkDivider,
             error: AppColors.darkError,
-            onError: AppColors.darkText,
-            errorContainer: Color(0x33FF6B70),
+            onError: AppColors.darkBackground,
+            errorContainer: AppColors.darkErrorContainer,
             onErrorContainer: AppColors.darkError,
           )
         : const ColorScheme.light(
-            primary: AppColors.primaryPink,
-            onPrimary: AppColors.white,
-            primaryContainer: AppColors.lightPink,
-            onPrimaryContainer: AppColors.deepPink,
-            secondary: AppColors.accentPink,
-            onSecondary: AppColors.white,
-            secondaryContainer: AppColors.lightPink,
-            onSecondaryContainer: AppColors.deepPink,
+            primary: AppColors.primary,
+            onPrimary: AppColors.textPrimary,
+            primaryContainer: AppColors.lightBackground,
+            onPrimaryContainer: AppColors.primary,
+            secondary: AppColors.secondary,
+            onSecondary: AppColors.textPrimary,
+            secondaryContainer: AppColors.lightBackground,
+            onSecondaryContainer: AppColors.textPrimary,
             surface: AppColors.white,
-            onSurface: AppColors.darkText,
-            surfaceContainerHighest: AppColors.veryLightPink,
-            onSurfaceVariant: AppColors.secondaryText,
+            onSurface: AppColors.textPrimary,
+            surfaceContainerHighest: AppColors.lightBackground,
+            onSurfaceVariant: AppColors.textSecondary,
             outline: AppColors.border,
-            outlineVariant: AppColors.border,
+            outlineVariant: AppColors.divider,
             error: AppColors.error,
             onError: AppColors.white,
-            errorContainer: Color(0x1AE5484D),
+            errorContainer: AppColors.errorContainer,
             onErrorContainer: AppColors.error,
           );
 
-    final scaffoldBackground = isDark ? AppColors.darkBackground : AppColors.softBackground;
+    final scaffoldBackground = isDark ? AppColors.darkBackground : AppColors.background;
     final cardSurface = isDark ? AppColors.darkSurface : AppColors.white;
+    final disabledBackground = isDark ? AppColors.darkDisabled : AppColors.disabled;
+    final disabledForeground = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     final textTheme = AppTextStyles.textTheme(brightness);
 
     return ThemeData(
@@ -94,34 +98,41 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.4),
-          disabledForegroundColor: colorScheme.onPrimary.withValues(alpha: 0.7),
+          disabledBackgroundColor: disabledBackground,
+          disabledForegroundColor: disabledForeground,
           minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(horizontal: 24),
           textStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.pillRadius),
+          elevation: 0,
         ),
       ),
 
+      // Doubles as the "Outline Button" from the spec: white/black surface,
+      // solid border in the foreground color, no fill.
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: colorScheme.primary,
-          disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.4),
+          foregroundColor: colorScheme.onSurface,
+          disabledForegroundColor: disabledForeground,
           minimumSize: const Size.fromHeight(52),
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.4)),
-          textStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
+          side: BorderSide(color: colorScheme.onSurface),
+          textStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.pillRadius),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith(
+            (states) => BorderSide(color: states.contains(WidgetState.disabled) ? colorScheme.outline : colorScheme.onSurface),
+          ),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: colorScheme.primary,
-          disabledForegroundColor: colorScheme.primary.withValues(alpha: 0.4),
+          foregroundColor: colorScheme.onSurface,
+          disabledForegroundColor: disabledForeground,
           minimumSize: const Size(0, 44),
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          textStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
+          textStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
         ),
       ),
@@ -132,14 +143,14 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.darkSurfaceElevated : AppColors.veryLightPink,
+        fillColor: cardSurface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: textTheme.bodyMedium,
+        hintStyle: textTheme.bodyMedium?.copyWith(color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
         labelStyle: textTheme.bodyMedium,
-        floatingLabelStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
-        border: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.outlineVariant)),
-        enabledBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.outlineVariant)),
-        focusedBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.primary, width: 1.5)),
+        floatingLabelStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
+        border: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.outline)),
+        enabledBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.outline)),
+        focusedBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.onSurface, width: 1.5)),
         errorBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.error)),
         focusedErrorBorder: OutlineInputBorder(borderRadius: AppRadius.mdRadius, borderSide: BorderSide(color: colorScheme.error, width: 1.5)),
         errorStyle: textTheme.bodySmall?.copyWith(color: colorScheme.error),
@@ -147,19 +158,21 @@ class AppTheme {
 
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected) ? colorScheme.primary : null,
+          (states) => states.contains(WidgetState.selected) ? colorScheme.primary : colorScheme.surface,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected) ? colorScheme.primary.withValues(alpha: 0.5) : null,
+          (states) => states.contains(WidgetState.selected) ? colorScheme.primary.withValues(alpha: 0.4) : colorScheme.surfaceContainerHighest,
         ),
-        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? Colors.transparent : colorScheme.outline,
+        ),
       ),
 
       sliderTheme: SliderThemeData(
         activeTrackColor: colorScheme.primary,
-        inactiveTrackColor: colorScheme.primary.withValues(alpha: 0.15),
+        inactiveTrackColor: colorScheme.surfaceContainerHighest,
         thumbColor: colorScheme.primary,
-        overlayColor: colorScheme.primary.withValues(alpha: 0.12),
+        overlayColor: colorScheme.primary.withValues(alpha: 0.1),
         valueIndicatorColor: colorScheme.primary,
         valueIndicatorTextStyle: textTheme.labelMedium?.copyWith(color: colorScheme.onPrimary),
       ),
@@ -175,7 +188,12 @@ class AppTheme {
 
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surfaceContainerHighest,
+        selectedColor: colorScheme.primary,
+        secondarySelectedColor: colorScheme.primary,
+        checkmarkColor: colorScheme.onPrimary,
+        disabledColor: colorScheme.surfaceContainerHighest,
         labelStyle: textTheme.labelMedium?.copyWith(color: colorScheme.onSurface),
+        secondaryLabelStyle: textTheme.labelMedium?.copyWith(color: colorScheme.onPrimary),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.pillRadius),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -184,7 +202,8 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: cardSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.xlRadius, side: BorderSide(color: colorScheme.outlineVariant)),
         titleTextStyle: textTheme.headlineSmall,
         contentTextStyle: textTheme.bodyMedium,
       ),
@@ -192,16 +211,19 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: cardSurface,
         surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        modalElevation: 0,
         showDragHandle: true,
         dragHandleColor: colorScheme.outline,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl))),
       ),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.darkText,
+        backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.textPrimary,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: AppColors.white),
-        actionTextColor: isDark ? AppColors.darkPrimaryPink : AppColors.accentPink,
+        actionTextColor: AppColors.white,
         behavior: SnackBarBehavior.floating,
+        elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.mdRadius),
       ),
 
@@ -214,7 +236,8 @@ class AppTheme {
 
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: colorScheme.primary,
-        circularTrackColor: colorScheme.primary.withValues(alpha: 0.15),
+        circularTrackColor: colorScheme.surfaceContainerHighest,
+        linearTrackColor: colorScheme.surfaceContainerHighest,
       ),
 
       dividerTheme: DividerThemeData(color: colorScheme.outlineVariant, thickness: 1, space: 1),
@@ -222,6 +245,10 @@ class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
+        elevation: 1,
+        focusElevation: 1,
+        hoverElevation: 2,
+        highlightElevation: 2,
         extendedTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary),
         shape: RoundedRectangleBorder(borderRadius: AppRadius.pillRadius),
       ),

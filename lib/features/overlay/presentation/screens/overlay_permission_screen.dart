@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../providers/overlay_providers.dart';
@@ -49,8 +48,8 @@ class _OverlayPermissionScreenState extends ConsumerState<OverlayPermissionScree
         data: (state) {
           final controller = ref.read(overlayControllerProvider.notifier);
           final granted = state.overlayPermissionGranted;
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final accent = granted ? (isDark ? AppColors.darkSuccess : AppColors.success) : Theme.of(context).colorScheme.primary;
+          final colorScheme = Theme.of(context).colorScheme;
+          final accent = colorScheme.onSurface;
 
           return Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
@@ -69,12 +68,10 @@ class _OverlayPermissionScreenState extends ConsumerState<OverlayPermissionScree
                       height: 160,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [accent.withValues(alpha: 0.18), accent.withValues(alpha: 0.0)],
-                        ),
+                        color: colorScheme.surfaceContainerHighest,
                       ),
                       child: Icon(
-                        granted ? Icons.check_circle_rounded : Icons.layers_rounded,
+                        granted ? Icons.check_circle_outline_rounded : Icons.layers_outlined,
                         size: 88,
                         color: accent,
                       ),
@@ -91,7 +88,7 @@ class _OverlayPermissionScreenState extends ConsumerState<OverlayPermissionScree
                 Text(
                   granted
                       ? 'Your pet can now float above other apps. You can start it from the home screen.'
-                      : 'Floating Pet Overlay needs the "display over other apps" permission to draw your '
+                      : 'Floating Streak needs the "display over other apps" permission to draw your '
                           'pet above other applications. This is what lets the pet keep moving and follow '
                           'your finger even while you use other apps.\n\n'
                           'Tap below to open system settings, enable the permission for this app, then '

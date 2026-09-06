@@ -1,4 +1,4 @@
-# Floating Pet Overlay
+# Floating Streak
 
 A Flutter + Kotlin Android app that displays a draggable, auto-moving
 animated pet floating above other apps via a foreground service and
@@ -29,7 +29,7 @@ animated pet floating above other apps via a foreground service and
   (`OverlayPermissionScreen`).
 - Runtime `POST_NOTIFICATIONS` permission request (API 33+).
 - Persistent settings (size, opacity, speed, movement, sound flag,
-  auto-start) via `shared_preferences` on the Dart side, mirrored into native
+  auto-start) via `hive` on the Dart side, mirrored into native
   `SharedPreferences` (`OverlayPrefs`) so a `BOOT_COMPLETED` receiver can
   restart the overlay with no Dart VM running.
 - Position persistence + restore across overlay restarts.
@@ -278,7 +278,7 @@ storage is local).
   `show()` call, but a stale `WindowManager` reference across a service
   recreation could still surface here).
 - **Notification doesn't show**: confirm `POST_NOTIFICATIONS` is granted on
-  API 33+ (Settings → Apps → Floating Pet Overlay → Notifications). The
+  API 33+ (Settings → Apps → Floating Streak → Notifications). The
   service still runs without it — only the visible notification is
   suppressed.
 - **Overlay survives after force-stopping the app from system Settings**:

@@ -241,9 +241,8 @@ class _PetTile extends StatelessWidget {
                   left: -8,
                   child: Material(
                     color: colorScheme.surface,
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    shadowColor: Colors.black26,
+                    shape: CircleBorder(side: BorderSide(color: colorScheme.outlineVariant)),
+                    elevation: 0,
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: onEdit,
@@ -260,9 +259,8 @@ class _PetTile extends StatelessWidget {
                   right: -8,
                   child: Material(
                     color: colorScheme.surface,
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    shadowColor: Colors.black26,
+                    shape: CircleBorder(side: BorderSide(color: colorScheme.outlineVariant)),
+                    elevation: 0,
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: onDelete,

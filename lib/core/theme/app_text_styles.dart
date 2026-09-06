@@ -3,45 +3,42 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// App-wide type scale. Headings use Baloo 2 (rounded, playful); body/UI
-/// copy uses Inter (clean, highly readable). Build a [TextTheme] per
-/// brightness with [textTheme] and read named looks off it via
-/// `Theme.of(context).textTheme`.
+/// App-wide type scale. A single clean sans-serif (Plus Jakarta Sans) is used
+/// throughout — hierarchy comes from weight and size, not from mixing font
+/// families. Build a [TextTheme] per brightness with [textTheme] and read
+/// named looks off it via `Theme.of(context).textTheme`.
 abstract final class AppTextStyles {
-  static TextStyle _display({required double size, required Color color, FontWeight weight = FontWeight.w700}) =>
-      GoogleFonts.baloo2(fontSize: size, fontWeight: weight, color: color, height: 1.2, letterSpacing: -0.2);
-
-  static TextStyle _body({
+  static TextStyle _text({
     required double size,
     required Color color,
     FontWeight weight = FontWeight.w400,
     double letterSpacing = 0,
     double height = 1.4,
   }) =>
-      GoogleFonts.inter(fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: letterSpacing);
+      GoogleFonts.plusJakartaSans(fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: letterSpacing);
 
   static TextTheme textTheme(Brightness brightness) {
-    final primary = brightness == Brightness.dark ? AppColors.darkTextPrimary : AppColors.darkText;
-    final secondary = brightness == Brightness.dark ? AppColors.darkSecondaryText : AppColors.secondaryText;
+    final primary = brightness == Brightness.dark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final secondary = brightness == Brightness.dark ? AppColors.darkTextSecondary : AppColors.textSecondary;
 
     return TextTheme(
-      // Headlines / titles — Baloo 2
-      displayLarge: _display(size: 34, color: primary),
-      displayMedium: _display(size: 28, color: primary),
-      headlineLarge: _display(size: 26, color: primary),
-      headlineMedium: _display(size: 22, color: primary),
-      headlineSmall: _display(size: 20, color: primary),
-      titleLarge: _display(size: 18, color: primary, weight: FontWeight.w600),
-      titleMedium: _body(size: 16, color: primary, weight: FontWeight.w600, letterSpacing: 0.1),
-      titleSmall: _body(size: 14, color: primary, weight: FontWeight.w600, letterSpacing: 0.1),
+      // Headings — bold, tight, comfortable line height
+      displayLarge: _text(size: 34, color: primary, weight: FontWeight.w700, height: 1.2, letterSpacing: -0.3),
+      displayMedium: _text(size: 28, color: primary, weight: FontWeight.w700, height: 1.2, letterSpacing: -0.2),
+      headlineLarge: _text(size: 26, color: primary, weight: FontWeight.w700, height: 1.25, letterSpacing: -0.2),
+      headlineMedium: _text(size: 22, color: primary, weight: FontWeight.w700, height: 1.25),
+      headlineSmall: _text(size: 20, color: primary, weight: FontWeight.w600, height: 1.3),
+      titleLarge: _text(size: 18, color: primary, weight: FontWeight.w600, height: 1.3),
+      titleMedium: _text(size: 16, color: primary, weight: FontWeight.w600, height: 1.4, letterSpacing: 0.1),
+      titleSmall: _text(size: 14, color: primary, weight: FontWeight.w600, height: 1.4, letterSpacing: 0.1),
 
-      // Body / labels — Inter
-      bodyLarge: _body(size: 16, color: primary, height: 1.5),
-      bodyMedium: _body(size: 14, color: secondary, height: 1.5),
-      bodySmall: _body(size: 12, color: secondary, height: 1.4),
-      labelLarge: _body(size: 15, color: primary, weight: FontWeight.w600, letterSpacing: 0.1),
-      labelMedium: _body(size: 13, color: secondary, weight: FontWeight.w600, letterSpacing: 0.2),
-      labelSmall: _body(size: 11, color: secondary, weight: FontWeight.w600, letterSpacing: 0.3),
+      // Body / labels
+      bodyLarge: _text(size: 16, color: primary, height: 1.5),
+      bodyMedium: _text(size: 14, color: secondary, height: 1.5),
+      bodySmall: _text(size: 12, color: secondary, height: 1.4),
+      labelLarge: _text(size: 15, color: primary, weight: FontWeight.w600, letterSpacing: 0.1),
+      labelMedium: _text(size: 13, color: secondary, weight: FontWeight.w600, letterSpacing: 0.2),
+      labelSmall: _text(size: 11, color: secondary, weight: FontWeight.w600, letterSpacing: 0.3),
     );
   }
 }

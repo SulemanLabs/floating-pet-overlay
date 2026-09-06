@@ -1,10 +1,15 @@
-import 'dart:convert';
+import 'package:hive/hive.dart';
 
 import '../../domain/entities/pet_entity.dart';
 
-/// JSON-serializable form of [PetEntity], used for the custom-pet list
-/// persisted in [LocalStorage] (built-in pets never round-trip through
-/// JSON — they're constructed in code, see `PetLocalDataSource.builtInPets`).
+/// `typeId` picked from the same unused range as `streakModelTypeId` — see
+/// that constant's doc for why the exact value doesn't matter beyond being
+/// unique across registered adapters.
+const int petModelTypeId = 12;
+
+/// Persisted form of [PetEntity], stored in the `pets` Hive box for custom
+/// pets only (built-in pets never round-trip through storage — they're
+/// constructed in code, see `PetLocalDataSource.builtInPets`).
 class PetModel extends PetEntity {
   const PetModel({
     required super.id,
@@ -31,39 +36,63 @@ class PetModel extends PetEntity {
       height: entity.height,
     );
   }
+}
 
-  factory PetModel.fromJson(Map<String, dynamic> json) {
+/// Hand-written adapter (the project has no `build_runner`/codegen step
+/// today) — field-indexed exactly like a generated adapter would be, so
+/// adding a field later stays backward compatible with already-persisted
+/// records. `type` is stored as its enum index, same approach as
+/// `StreakModel.statusIndex`.
+class PetModelAdapter extends TypeAdapter<PetModel> {
+  @override
+  final int typeId = petModelTypeId;
+
+  @override
+  PetModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read()};
+    final createdAtMillis = fields[6] as int?;
     return PetModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: PetType.values.byName(json['type'] as String),
-      emoji: json['emoji'] as String?,
-      assetPath: json['assetPath'] as String?,
-      builtIn: json['builtIn'] as bool? ?? false,
-      createdAt: json['createdAt'] == null ? null : DateTime.tryParse(json['createdAt'] as String),
-      width: json['width'] as int?,
-      height: json['height'] as int?,
+      id: fields[0] as String,
+      name: fields[1] as String,
+      type: PetType.values[(fields[2] as int).clamp(0, PetType.values.length - 1)],
+      emoji: fields[3] as String?,
+      assetPath: fields[4] as String?,
+      builtIn: fields[5] as bool? ?? false,
+      createdAt: createdAtMillis == null ? null : DateTime.fromMillisecondsSinceEpoch(createdAtMillis),
+      width: fields[7] as int?,
+      height: fields[8] as int?,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type.name,
-      'emoji': emoji,
-      'assetPath': assetPath,
-      'builtIn': builtIn,
-      'createdAt': createdAt?.toIso8601String(),
-      'width': width,
-      'height': height,
-    };
+  @override
+  void write(BinaryWriter writer, PetModel obj) {
+    writer
+      ..writeByte(9)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.type.index)
+      ..writeByte(3)
+      ..write(obj.emoji)
+      ..writeByte(4)
+      ..write(obj.assetPath)
+      ..writeByte(5)
+      ..write(obj.builtIn)
+      ..writeByte(6)
+      ..write(obj.createdAt?.millisecondsSinceEpoch)
+      ..writeByte(7)
+      ..write(obj.width)
+      ..writeByte(8)
+      ..write(obj.height);
   }
 
-  static String encodeList(List<PetModel> pets) => jsonEncode(pets.map((p) => p.toJson()).toList());
+  @override
+  int get hashCode => petModelTypeId.hashCode;
 
-  static List<PetModel> decodeList(String raw) {
-    final decoded = jsonDecode(raw) as List<dynamic>;
-    return decoded.map((e) => PetModel.fromJson(e as Map<String, dynamic>)).toList();
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is PetModelAdapter && runtimeType == other.runtimeType && typeId == other.typeId);
 }

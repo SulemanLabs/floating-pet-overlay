@@ -19,7 +19,7 @@ if (hasReleaseKeystore) {
 }
 
 android {
-    namespace = "com.floatingpet.overlay"
+    namespace = "com.sulemanlabs.floatingstreak"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.floatingpet.overlay"
+        applicationId = "com.sulemanlabs.floatingstreak"
         // TYPE_APPLICATION_OVERLAY and notification channels both require API 26+;
         // pinning the floor here (rather than trusting Flutter's default, which can
         // be lower) keeps the overlay feature set from silently degrading.

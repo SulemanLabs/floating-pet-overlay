@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:floating_pet_overlay/features/streak/domain/entities/streak_entity.dart';
+import 'package:floating_streak/features/streak/domain/entities/streak_entity.dart';
 
 void main() {
   group('open-ended (count-up) streak', () {

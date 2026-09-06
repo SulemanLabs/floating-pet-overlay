@@ -31,7 +31,14 @@ class HomeStreakCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('🔥 Start a Streak', style: Theme.of(context).textTheme.titleMedium),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_fire_department_outlined, size: 18, color: colorScheme.onSurface),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('Start a Streak', style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Track your progress with a simple timer.',
@@ -55,7 +62,14 @@ class HomeStreakCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('🔥 Current Streak', style: Theme.of(context).textTheme.titleMedium),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.local_fire_department_outlined, size: 18, color: colorScheme.onSurface),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text('Current Streak', style: Theme.of(context).textTheme.titleMedium),
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 StreakCountdown(
                   value: countdown,

@@ -43,7 +43,9 @@ class CurrentStreakCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text('🔥 Current Streak', style: Theme.of(context).textTheme.titleMedium),
+              Icon(Icons.local_fire_department_outlined, size: 20, color: colorScheme.onSurface),
+              const SizedBox(width: AppSpacing.xs),
+              Text('Current Streak', style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),

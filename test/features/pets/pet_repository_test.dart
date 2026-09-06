@@ -1,20 +1,42 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
-import 'package:floating_pet_overlay/core/storage/local_storage.dart';
-import 'package:floating_pet_overlay/features/pets/data/datasources/pet_local_datasource.dart';
-import 'package:floating_pet_overlay/features/pets/data/models/pet_model.dart';
-import 'package:floating_pet_overlay/features/pets/data/repositories/pet_repository_impl.dart';
-import 'package:floating_pet_overlay/features/pets/domain/entities/pet_entity.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
+
+import 'package:floating_streak/core/storage/local_storage.dart';
+import 'package:floating_streak/features/pets/data/datasources/pet_local_datasource.dart';
+import 'package:floating_streak/features/pets/data/models/pet_model.dart';
+import 'package:floating_streak/features/pets/data/repositories/pet_repository_impl.dart';
+import 'package:floating_streak/features/pets/domain/entities/pet_entity.dart';
 
 void main() {
+  late Directory tempDir;
+  late Box<PetModel> petBox;
+  late Box prefsBox;
   late LocalStorage storage;
   late PetRepositoryImpl repository;
 
+  setUpAll(() {
+    if (!Hive.isAdapterRegistered(petModelTypeId)) {
+      Hive.registerAdapter(PetModelAdapter());
+    }
+  });
+
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    storage = await LocalStorage.create();
-    repository = PetRepositoryImpl(PetLocalDataSource(storage));
+    tempDir = await Directory.systemTemp.createTemp('pet_hive_test');
+    Hive.init(tempDir.path);
+    petBox = await Hive.openBox<PetModel>('pets_test');
+    prefsBox = await Hive.openBox('prefs_test');
+    storage = LocalStorage(prefsBox);
+    repository = PetRepositoryImpl(PetLocalDataSource(petBox, storage));
+  });
+
+  tearDown(() async {
+    if (petBox.isOpen) await petBox.close();
+    if (prefsBox.isOpen) await prefsBox.close();
+    await Hive.deleteBoxFromDisk('pets_test', path: tempDir.path);
+    await Hive.deleteBoxFromDisk('prefs_test', path: tempDir.path);
+    if (await tempDir.exists()) await tempDir.delete(recursive: true);
   });
 
   test('getPets returns all built-in pets when no custom pets exist', () async {
@@ -33,7 +55,7 @@ void main() {
   test('selectPet persists the choice across repository instances', () async {
     await repository.selectPet('builtin_fox');
 
-    final freshRepository = PetRepositoryImpl(PetLocalDataSource(storage));
+    final freshRepository = PetRepositoryImpl(PetLocalDataSource(petBox, storage));
     final selected = await freshRepository.getSelectedPet();
 
     expect(selected.id, 'builtin_fox');
@@ -47,8 +69,8 @@ void main() {
     expect(selected.builtIn, isTrue);
   });
 
-  test('custom pets survive a JSON encode/decode round trip via the datasource', () async {
-    final dataSource = PetLocalDataSource(storage);
+  test('custom pets survive a save/reload round trip via the datasource', () async {
+    final dataSource = PetLocalDataSource(petBox, storage);
     final custom = PetModel(
       id: 'custom_1',
       name: 'My Pet',
@@ -59,7 +81,7 @@ void main() {
     );
 
     await dataSource.saveCustomPets([custom]);
-    final reloaded = PetLocalDataSource(storage).getCustomPets();
+    final reloaded = PetLocalDataSource(petBox, storage).getCustomPets();
 
     expect(reloaded, hasLength(1));
     expect(reloaded.single.id, 'custom_1');

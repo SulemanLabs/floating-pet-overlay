@@ -1,20 +1,36 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
-import 'package:floating_pet_overlay/core/storage/local_storage.dart';
-import 'package:floating_pet_overlay/features/tasks/data/datasources/task_local_datasource.dart';
-import 'package:floating_pet_overlay/features/tasks/data/repositories/task_repository_impl.dart';
-import 'package:floating_pet_overlay/features/tasks/domain/entities/task_entity.dart';
-import 'package:floating_pet_overlay/features/tasks/presentation/providers/task_providers.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
+
+import 'package:floating_streak/features/tasks/data/datasources/task_local_datasource.dart';
+import 'package:floating_streak/features/tasks/data/models/task_model.dart';
+import 'package:floating_streak/features/tasks/data/repositories/task_repository_impl.dart';
+import 'package:floating_streak/features/tasks/domain/entities/task_entity.dart';
+import 'package:floating_streak/features/tasks/presentation/providers/task_providers.dart';
 
 void main() {
-  late LocalStorage storage;
+  late Directory tempDir;
+  late Box<TaskModel> box;
   late TaskRepositoryImpl repository;
 
+  setUpAll(() {
+    if (!Hive.isAdapterRegistered(taskModelTypeId)) {
+      Hive.registerAdapter(TaskModelAdapter());
+    }
+  });
+
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    storage = await LocalStorage.create();
-    repository = TaskRepositoryImpl(TaskLocalDataSource(storage));
+    tempDir = await Directory.systemTemp.createTemp('task_hive_test');
+    Hive.init(tempDir.path);
+    box = await Hive.openBox<TaskModel>('tasks_test');
+    repository = TaskRepositoryImpl(TaskLocalDataSource(box));
+  });
+
+  tearDown(() async {
+    if (box.isOpen) await box.close();
+    await Hive.deleteBoxFromDisk('tasks_test', path: tempDir.path);
+    if (await tempDir.exists()) await tempDir.delete(recursive: true);
   });
 
   TaskEntity buildTask({required String id, required DateTime deadline, bool isCompleted = false}) {
@@ -28,7 +44,7 @@ void main() {
   test('addTask persists and survives a fresh repository instance', () async {
     await repository.addTask(buildTask(id: 't1', deadline: DateTime(2026, 6, 1)));
 
-    final reloaded = await TaskRepositoryImpl(TaskLocalDataSource(storage)).getTasks();
+    final reloaded = await TaskRepositoryImpl(TaskLocalDataSource(box)).getTasks();
 
     expect(reloaded, hasLength(1));
     expect(reloaded.single.id, 't1');

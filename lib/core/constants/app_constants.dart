@@ -2,7 +2,7 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String appName = 'Floating Pet Overlay';
+  static const String appName = 'Floating Streak';
 
   // Settings bounds — mirrored on the native side so both layers agree.
   static const double minSizePercent = 0.5;

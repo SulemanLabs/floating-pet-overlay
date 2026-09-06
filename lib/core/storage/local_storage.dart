@@ -1,29 +1,31 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 
-/// Thin wrapper around [SharedPreferences] so data sources depend on this
-/// interface rather than the plugin directly — swapping to a different local
-/// persistence mechanism later only touches this file.
+/// Thin wrapper over the `prefs` Hive box, for the scalar key/value settings
+/// that don't warrant a typed box of their own (overlay settings, the
+/// selected pet id). Hive stores primitives natively, so no adapter is
+/// needed here — only the typed per-feature boxes (tasks, pets, streaks)
+/// register one.
 class LocalStorage {
-  LocalStorage(this._prefs);
+  LocalStorage(this._box);
 
-  final SharedPreferences _prefs;
+  final Box _box;
 
   static Future<LocalStorage> create() async {
-    final prefs = await SharedPreferences.getInstance();
-    return LocalStorage(prefs);
+    final box = Hive.isBoxOpen('prefs') ? Hive.box('prefs') : await Hive.openBox('prefs');
+    return LocalStorage(box);
   }
 
-  String? getString(String key) => _prefs.getString(key);
+  String? getString(String key) => _box.get(key) as String?;
 
-  Future<bool> setString(String key, String value) => _prefs.setString(key, value);
+  Future<void> setString(String key, String value) => _box.put(key, value);
 
-  double? getDouble(String key) => _prefs.getDouble(key);
+  double? getDouble(String key) => (_box.get(key) as num?)?.toDouble();
 
-  Future<bool> setDouble(String key, double value) => _prefs.setDouble(key, value);
+  Future<void> setDouble(String key, double value) => _box.put(key, value);
 
-  bool? getBool(String key) => _prefs.getBool(key);
+  bool? getBool(String key) => _box.get(key) as bool?;
 
-  Future<bool> setBool(String key, bool value) => _prefs.setBool(key, value);
+  Future<void> setBool(String key, bool value) => _box.put(key, value);
 
-  Future<bool> remove(String key) => _prefs.remove(key);
+  Future<void> remove(String key) => _box.delete(key);
 }

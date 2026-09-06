@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:floating_pet_overlay/core/errors/failures.dart';
-import 'package:floating_pet_overlay/core/platform/overlay_platform_events.dart';
-import 'package:floating_pet_overlay/features/overlay/domain/repositories/overlay_repository.dart';
-import 'package:floating_pet_overlay/features/overlay/presentation/providers/overlay_providers.dart';
-import 'package:floating_pet_overlay/features/pets/domain/entities/pet_entity.dart';
-import 'package:floating_pet_overlay/features/settings/domain/entities/overlay_settings.dart';
-import 'package:floating_pet_overlay/features/streak/domain/entities/streak_entity.dart';
-import 'package:floating_pet_overlay/features/streak/domain/entities/streak_stats.dart';
-import 'package:floating_pet_overlay/features/streak/domain/repositories/streak_repository.dart';
-import 'package:floating_pet_overlay/features/streak/presentation/providers/streak_providers.dart';
+import 'package:floating_streak/core/errors/failures.dart';
+import 'package:floating_streak/core/platform/overlay_platform_events.dart';
+import 'package:floating_streak/features/overlay/domain/repositories/overlay_repository.dart';
+import 'package:floating_streak/features/overlay/presentation/providers/overlay_providers.dart';
+import 'package:floating_streak/features/pets/domain/entities/pet_entity.dart';
+import 'package:floating_streak/features/settings/domain/entities/overlay_settings.dart';
+import 'package:floating_streak/features/streak/domain/entities/streak_entity.dart';
+import 'package:floating_streak/features/streak/domain/entities/streak_stats.dart';
+import 'package:floating_streak/features/streak/domain/repositories/streak_repository.dart';
+import 'package:floating_streak/features/streak/presentation/providers/streak_providers.dart';
 
 /// In-memory fake — this project has no mocking library, so hand-written
 /// fakes are the existing convention.

@@ -26,20 +26,17 @@ class AppBanner extends StatelessWidget {
 
   (Color, Color, IconData) _look(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
+    // Only the destructive/error tone gets color — info and warning are
+    // told apart by icon and copy, not hue, to stay within the monochrome
+    // palette.
+    final neutralAccent = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final neutralTint = isDark ? AppColors.darkSurfaceElevated : AppColors.lightBackground;
     return switch (variant) {
-      AppBannerVariant.info => (
-          isDark ? AppColors.darkInfo : AppColors.info,
-          isDark ? const Color(0x267CA8FF) : const Color(0x144F8CFF),
-          Icons.info_outline,
-        ),
-      AppBannerVariant.warning => (
-          isDark ? AppColors.darkWarning : AppColors.warning,
-          isDark ? const Color(0x26FFA940) : const Color(0x14F79009),
-          Icons.warning_amber_rounded,
-        ),
+      AppBannerVariant.info => (neutralAccent, neutralTint, Icons.info_outline),
+      AppBannerVariant.warning => (neutralAccent, neutralTint, Icons.warning_amber_outlined),
       AppBannerVariant.error => (
           isDark ? AppColors.darkError : AppColors.error,
-          isDark ? const Color(0x26FF6B70) : const Color(0x14E5484D),
+          isDark ? AppColors.darkErrorContainer : AppColors.errorContainer,
           Icons.error_outline,
         ),
     };

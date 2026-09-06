@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 
 enum AppStatusTone { success, warning, neutral }
 
-/// Small colored pill for a status label (e.g. Active / Starting / Stopped).
-/// Uses the semantic success/warning colors instead of raw [Colors.green]
-/// etc. so the palette stays centralized.
+/// Small monochrome pill for a status label (e.g. Active / Starting /
+/// Stopped). Tone is conveyed by weight (solid black vs. muted gray dot),
+/// not hue, to stay within the monochrome palette.
 class AppStatusChip extends StatelessWidget {
   const AppStatusChip({super.key, required this.label, required this.tone});
 
@@ -16,12 +15,12 @@ class AppStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final color = switch (tone) {
-      AppStatusTone.success => isDark ? AppColors.darkSuccess : AppColors.success,
-      AppStatusTone.warning => isDark ? AppColors.darkWarning : AppColors.warning,
-      AppStatusTone.neutral => AppColors.neutral,
+      AppStatusTone.success => colorScheme.onSurface,
+      AppStatusTone.warning => colorScheme.onSurfaceVariant,
+      AppStatusTone.neutral => colorScheme.onSurfaceVariant,
     };
 
     return Container(

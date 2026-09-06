@@ -1,23 +1,31 @@
-import '../../../../core/storage/local_storage.dart';
+import 'package:hive/hive.dart';
+
 import '../models/task_model.dart';
 
+/// Thin wrapper over the `tasks` Hive box — the only place in the tasks
+/// feature that touches Hive directly, mirroring `StreakLocalDataSource`'s
+/// role for the `streaks` box.
 class TaskLocalDataSource {
-  TaskLocalDataSource(this._storage);
+  TaskLocalDataSource(this._box);
 
-  final LocalStorage _storage;
-
-  static const _tasksKey = 'tasks.list';
+  final Box<TaskModel> _box;
 
   List<TaskModel> getTasks() {
-    final raw = _storage.getString(_tasksKey);
-    if (raw == null || raw.isEmpty) return const [];
-    try {
-      return TaskModel.decodeList(raw);
-    } catch (_) {
-      // Corrupted persisted data — fail safe rather than crash the tasks screen.
-      return const [];
+    final tasks = <TaskModel>[];
+    for (final key in _box.keys) {
+      try {
+        final model = _box.get(key);
+        if (model != null) tasks.add(model);
+      } catch (_) {
+        // A single corrupted record must not take down the whole tasks list.
+        continue;
+      }
     }
+    return tasks;
   }
 
-  Future<void> saveTasks(List<TaskModel> tasks) => _storage.setString(_tasksKey, TaskModel.encodeList(tasks));
+  Future<void> saveTasks(List<TaskModel> tasks) async {
+    await _box.clear();
+    await _box.putAll({for (final task in tasks) task.id: task});
+  }
 }

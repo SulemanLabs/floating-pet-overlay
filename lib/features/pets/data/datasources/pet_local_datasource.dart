@@ -1,3 +1,5 @@
+import 'package:hive/hive.dart';
+
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../domain/entities/pet_entity.dart';
@@ -16,29 +18,36 @@ const List<PetModel> _builtInPets = [
   PetModel(id: 'builtin_robot', name: 'Robot', type: PetType.emoji, emoji: '🤖', builtIn: true),
 ];
 
+/// Custom pets live in the `pets` Hive box (mirroring `StreakLocalDataSource`
+/// and `TaskLocalDataSource`); the selected pet id is just a scalar, so it
+/// stays in the shared `prefs` box via [LocalStorage].
 class PetLocalDataSource {
-  PetLocalDataSource(this._storage);
+  PetLocalDataSource(this._box, this._storage);
 
+  final Box<PetModel> _box;
   final LocalStorage _storage;
 
-  static const _customPetsKey = 'pets.custom_list';
   static const _selectedPetIdKey = 'pets.selected_id';
 
   List<PetModel> get builtInPets => _builtInPets;
 
   List<PetModel> getCustomPets() {
-    final raw = _storage.getString(_customPetsKey);
-    if (raw == null || raw.isEmpty) return const [];
-    try {
-      return PetModel.decodeList(raw);
-    } catch (_) {
-      // Corrupted persisted data — fail safe rather than crash the pet library.
-      return const [];
+    final pets = <PetModel>[];
+    for (final key in _box.keys) {
+      try {
+        final model = _box.get(key);
+        if (model != null) pets.add(model);
+      } catch (_) {
+        // A single corrupted record must not take down the whole pet library.
+        continue;
+      }
     }
+    return pets;
   }
 
   Future<void> saveCustomPets(List<PetModel> pets) async {
-    await _storage.setString(_customPetsKey, PetModel.encodeList(pets));
+    await _box.clear();
+    await _box.putAll({for (final pet in pets) pet.id: pet});
   }
 
   String getSelectedPetId() => _storage.getString(_selectedPetIdKey) ?? AppConstants.defaultPetId;

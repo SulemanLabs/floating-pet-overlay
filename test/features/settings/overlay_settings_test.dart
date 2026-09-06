@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:floating_pet_overlay/features/settings/domain/entities/overlay_settings.dart';
+import 'package:floating_streak/features/settings/domain/entities/overlay_settings.dart';
 
 void main() {
   group('OverlaySettings.copyWith clamping', () {

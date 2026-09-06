@@ -27,7 +27,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Floating Pet Overlay'),
+        title: const Text('Floating Streak'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.base),
@@ -153,7 +153,7 @@ class _HomeBody extends ConsumerWidget {
                 const Divider(height: 1, indent: AppSpacing.base, endIndent: AppSpacing.base),
                 _QuickActionTile(
                   icon: Icons.local_fire_department_rounded,
-                  title: '🔥 Streak',
+                  title: 'Streak',
                   subtitle: 'Track a count-up or countdown streak',
                   onTap: () => context.push(AppRoutes.streak),
                 ),
@@ -190,12 +190,7 @@ class _PetHeroCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.base),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [colorScheme.primary.withValues(alpha: 0.16), colorScheme.primary.withValues(alpha: 0.0)],
-              ),
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: colorScheme.surfaceContainerHighest),
             child: PetAvatar(pet: state.selectedPet, size: 140, opacity: state.settings.opacity),
           ),
           const SizedBox(height: AppSpacing.base),

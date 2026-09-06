@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:floating_pet_overlay/core/utils/deadline_formatter.dart';
+import 'package:floating_streak/core/utils/deadline_formatter.dart';
 
 void main() {
   final now = DateTime(2026, 1, 1, 12, 0, 0);

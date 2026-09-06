@@ -12,7 +12,7 @@ import '../../domain/usecases/get_tasks.dart';
 import '../../domain/usecases/set_task_completed.dart';
 
 final taskLocalDataSourceProvider = Provider<TaskLocalDataSource>((ref) {
-  return TaskLocalDataSource(ref.watch(localStorageProvider));
+  return TaskLocalDataSource(ref.watch(taskHiveBoxProvider));
 });
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {

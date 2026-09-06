@@ -5,9 +5,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:floating_pet_overlay/core/errors/failures.dart';
-import 'package:floating_pet_overlay/features/pets/data/datasources/pet_asset_storage.dart';
-import 'package:floating_pet_overlay/features/pets/domain/entities/pet_entity.dart';
+import 'package:floating_streak/core/errors/failures.dart';
+import 'package:floating_streak/features/pets/data/datasources/pet_asset_storage.dart';
+import 'package:floating_streak/features/pets/domain/entities/pet_entity.dart';
 
 /// Renders a real 1x1 PNG through `dart:ui` rather than hand-crafting PNG
 /// bytes — guarantees a codec-valid file without hardcoding a fragile,

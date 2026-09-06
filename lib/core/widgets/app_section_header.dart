@@ -16,7 +16,7 @@ class AppSectionHeader extends StatelessWidget {
       padding: padding,
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }

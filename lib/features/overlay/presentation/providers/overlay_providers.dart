@@ -32,7 +32,6 @@ class OverlayController extends AsyncNotifier<OverlayUiState> {
     final selectedPet = await petRepository.getSelectedPet();
     final settings = await settingsRepository.getSettings();
     final overlayPermissionGranted = await _repository.isOverlayPermissionGranted();
-    final notificationPermissionGranted = await _repository.isNotificationPermissionGranted();
 
     _eventSubscription?.cancel();
     _eventSubscription = _repository.events.listen(_onPlatformEvent);
@@ -41,7 +40,6 @@ class OverlayController extends AsyncNotifier<OverlayUiState> {
     return OverlayUiState(
       status: OverlayStatus.stopped,
       overlayPermissionGranted: overlayPermissionGranted,
-      notificationPermissionGranted: notificationPermissionGranted,
       selectedPet: selectedPet,
       settings: settings,
     );
@@ -70,21 +68,11 @@ class OverlayController extends AsyncNotifier<OverlayUiState> {
     final current = state.value;
     if (current == null) return;
     final overlayGranted = await _repository.isOverlayPermissionGranted();
-    final notificationGranted = await _repository.isNotificationPermissionGranted();
-    state = AsyncData(
-      current.copyWith(overlayPermissionGranted: overlayGranted, notificationPermissionGranted: notificationGranted),
-    );
+    state = AsyncData(current.copyWith(overlayPermissionGranted: overlayGranted));
   }
 
   Future<void> requestOverlayPermission() async {
     await _repository.requestOverlayPermission();
-  }
-
-  Future<void> requestNotificationPermission() async {
-    final granted = await _repository.requestNotificationPermission();
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncData(current.copyWith(notificationPermissionGranted: granted));
   }
 
   Future<void> selectPet(String petId) async {

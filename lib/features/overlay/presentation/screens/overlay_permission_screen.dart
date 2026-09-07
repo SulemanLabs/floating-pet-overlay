@@ -101,14 +101,6 @@ class _OverlayPermissionScreenState extends ConsumerState<OverlayPermissionScree
                   AppButton(label: 'Open settings', onPressed: controller.requestOverlayPermission)
                 else
                   AppButton(label: 'Continue', onPressed: () => Navigator.of(context).maybePop()),
-                if (!state.notificationPermissionGranted) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  AppButton(
-                    label: 'Allow notifications',
-                    variant: AppButtonVariant.secondary,
-                    onPressed: controller.requestNotificationPermission,
-                  ),
-                ],
               ],
             ),
           );

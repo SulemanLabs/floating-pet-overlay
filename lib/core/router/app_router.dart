@@ -1,6 +1,12 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/overlay/presentation/screens/home_screen.dart';
 import '../../features/overlay/presentation/screens/overlay_permission_screen.dart';
 import '../../features/pets/domain/entities/pet_entity.dart';
@@ -11,11 +17,14 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/streak/presentation/screens/streak_history_screen.dart';
 import '../../features/streak/presentation/screens/streak_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_screen.dart';
+import '../constants/app_constants.dart';
 
 class AppRoutes {
   const AppRoutes._();
 
   static const home = '/';
+  static const onboarding = '/onboarding';
+  static const login = '/login';
   static const pets = '/pets';
   static const addPet = '/pets/add';
   static const addEmojiPet = '/pets/add-emoji';
@@ -47,9 +56,48 @@ CustomTransitionPage<void> _page(Widget child, GoRouterState state) {
   );
 }
 
+/// Reads the onboarding flag straight off the `prefs` Hive box rather than
+/// through Riverpod — `appRouter` is a plain top-level value with no `ref`,
+/// and `main.dart` guarantees the box is already open by the time this (or
+/// any route) is first evaluated.
+bool get _onboardingCompleted =>
+    (Hive.box('prefs').get(AppConstants.onboardingCompletedKey) as bool?) ?? false;
+
+/// Bridges a `Stream` to go_router's `Listenable`-based `refreshListenable`,
+/// so a Firebase auth state change re-runs `redirect` the same way an
+/// explicit `context.go()` call would.
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    _subscription = stream.listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 final appRouter = GoRouter(
   initialLocation: AppRoutes.home,
+  refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+  redirect: (context, state) {
+    final onOnboarding = state.matchedLocation == AppRoutes.onboarding;
+    if (!_onboardingCompleted) return onOnboarding ? null : AppRoutes.onboarding;
+    if (onOnboarding) return AppRoutes.home;
+
+    final onLogin = state.matchedLocation == AppRoutes.login;
+    final signedIn = FirebaseAuth.instance.currentUser != null;
+    if (!signedIn) return onLogin ? null : AppRoutes.login;
+    if (onLogin) return AppRoutes.home;
+
+    return null;
+  },
   routes: [
+    GoRoute(path: AppRoutes.onboarding, pageBuilder: (context, state) => _page(const OnboardingScreen(), state)),
+    GoRoute(path: AppRoutes.login, pageBuilder: (context, state) => _page(const LoginScreen(), state)),
     GoRoute(path: AppRoutes.home, pageBuilder: (context, state) => _page(const HomeScreen(), state)),
     GoRoute(
       path: AppRoutes.pets,

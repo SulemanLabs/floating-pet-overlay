@@ -246,9 +246,10 @@ class _PetTile extends StatelessWidget {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: onEdit,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(Icons.edit_outlined, size: 14, color: colorScheme.onSurfaceVariant),
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Icon(Icons.edit_outlined, size: 16, color: colorScheme.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -264,9 +265,10 @@ class _PetTile extends StatelessWidget {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: onDelete,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(Icons.close_rounded, size: 14, color: colorScheme.onSurfaceVariant),
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Icon(Icons.close_rounded, size: 16, color: colorScheme.onSurfaceVariant),
                       ),
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import '../../features/pets/data/models/pet_model.dart';
 import '../../features/streak/data/models/streak_model.dart';
 import '../../features/tasks/data/models/task_model.dart';
+import '../crash_reporting/crash_reporting_service.dart';
 import '../platform/overlay_platform_bridge.dart';
 import '../storage/local_storage.dart';
 
@@ -35,4 +36,11 @@ final overlayPlatformBridgeProvider = Provider<OverlayPlatformBridge>((ref) {
   final bridge = OverlayPlatformBridge();
   ref.onDispose(bridge.dispose);
   return bridge;
+});
+
+/// Overridden in `main.dart` with the instance created during app startup
+/// (global error handlers must be wired before anything else can crash) —
+/// same bootstrap shape as [localStorageProvider].
+final crashReportingServiceProvider = Provider<CrashReportingService>((ref) {
+  throw UnimplementedError('crashReportingServiceProvider must be overridden in main() before runApp');
 });

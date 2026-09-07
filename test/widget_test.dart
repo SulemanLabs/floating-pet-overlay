@@ -22,7 +22,6 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
       switch (call.method) {
         case PlatformChannelConstants.methodIsOverlayPermissionGranted:
-        case PlatformChannelConstants.methodIsNotificationPermissionGranted:
         case PlatformChannelConstants.methodStartOverlay:
         case PlatformChannelConstants.methodStopOverlay:
         case PlatformChannelConstants.methodSyncSettings:

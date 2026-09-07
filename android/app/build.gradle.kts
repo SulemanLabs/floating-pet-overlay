@@ -5,6 +5,11 @@ plugins {
     id("org.jetbrains.kotlin.android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Must be applied last so it can see the other Android plugins' config.
+    id("com.google.gms.google-services")
+    // Uploads mapping/symbol info at build time so Crashlytics can
+    // de-obfuscate release stack traces.
+    id("com.google.firebase.crashlytics")
 }
 
 // Release signing: reads android/key.properties if present (see section 33 /
@@ -26,6 +31,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -67,13 +73,16 @@ kotlin {
 }
 
 dependencies {
-    // NotificationCompat (OverlayNotificationFactory) and ActivityCompat/ContextCompat
-    // (MainActivity's permission handling) — declared explicitly rather than relying
-    // on whatever the Flutter embedding happens to pull in transitively.
+    // NotificationCompat (OverlayNotificationFactory) and ContextCompat
+    // (MainActivity's foreground-service start) — declared explicitly rather
+    // than relying on whatever the Flutter embedding happens to pull in
+    // transitively.
     implementation("androidx.core:core-ktx:1.15.0")
 
     // Renders imported Lottie JSON pets inside the overlay window (PetRenderer).
     implementation("com.airbnb.android:lottie:6.6.0")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

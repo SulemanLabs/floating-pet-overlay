@@ -5,6 +5,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_banner.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_confirm_dialog.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../overlay/presentation/providers/overlay_providers.dart';
 import '../../domain/entities/pet_entity.dart';
@@ -73,6 +74,21 @@ class _CustomEmojiScreenState extends ConsumerState<CustomEmojiScreen> {
       final activePetId = ref.read(overlayControllerProvider).value?.selectedPet.id;
       if (activePetId == saved.id) {
         await ref.read(overlayControllerProvider.notifier).selectPet(saved.id);
+      } else if (existing == null) {
+        // A brand-new pet, not yet active — offer to make it the floating
+        // pet right away instead of requiring a separate trip to the
+        // library to select it.
+        if (!mounted) return;
+        final setNow = await showAppConfirmDialog(
+          context,
+          title: 'Set as active pet?',
+          message: 'Make "${saved.name}" your floating pet right now?',
+          confirmLabel: 'Set now',
+          cancelLabel: 'Not now',
+        );
+        if (setNow && mounted) {
+          await ref.read(overlayControllerProvider.notifier).selectPet(saved.id);
+        }
       }
 
       if (!mounted) return;

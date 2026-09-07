@@ -1,8 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
+import 'core/crash_reporting/crash_reporting_service.dart';
 import 'core/providers/core_providers.dart';
 import 'core/storage/local_storage.dart';
 import 'features/pets/data/models/pet_model.dart';
@@ -19,6 +22,19 @@ Future<void> main() async {
 /// screen stuck forever with no way to recover short of a force-stop.
 Future<void> _bootstrap() async {
   try {
+    // Reads android/app/google-services.json (processed at build time by the
+    // google-services Gradle plugin) — no FlutterFire-generated options file
+    // needed for this Android-only build.
+    await Firebase.initializeApp();
+    // Must be awaited exactly once, before any other GoogleSignIn.instance
+    // call (see LoginScreen / auth_remote_datasource.dart).
+    await GoogleSignIn.instance.initialize();
+
+    // From here on, every uncaught error — Flutter framework and
+    // platform/async alike — is reported to Crashlytics (see
+    // `FirebaseCrashReportingService.initialize`).
+    final crashReporting = await FirebaseCrashReportingService.initialize();
+
     await Hive.initFlutter();
     _registerAdapters();
 
@@ -43,11 +59,17 @@ Future<void> _bootstrap() async {
           streakHiveBoxProvider.overrideWithValue(streakBox),
           taskHiveBoxProvider.overrideWithValue(taskBox),
           petHiveBoxProvider.overrideWithValue(petBox),
+          crashReportingServiceProvider.overrideWithValue(crashReporting),
         ],
         child: const FloatingPetOverlayApp(),
       ),
     );
-  } catch (error) {
+  } catch (error, stackTrace) {
+    // Best-effort: `FirebaseCrashReportingService.initialize()` may not
+    // have run yet (e.g. this is the very `Firebase.initializeApp()`
+    // failure that would have broken it), so this goes straight to the
+    // static fallback rather than a provider that may not exist.
+    await FirebaseCrashReportingService.recordBestEffort(error, stackTrace);
     runApp(_BootstrapErrorApp(error: error, onRetry: _bootstrap));
   }
 }

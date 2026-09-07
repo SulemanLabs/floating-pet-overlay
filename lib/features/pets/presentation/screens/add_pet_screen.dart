@@ -12,7 +12,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_banner.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_confirm_dialog.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../overlay/presentation/providers/overlay_providers.dart';
 import '../../data/datasources/pet_asset_storage.dart';
 import '../../domain/entities/pet_entity.dart';
 import '../providers/pet_providers.dart';
@@ -92,8 +94,21 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       _errorMessage = null;
     });
     try {
-      await ref.read(importCustomPetProvider).call(sourcePath: path, name: _nameController.text);
+      final pet = await ref.read(importCustomPetProvider).call(sourcePath: path, name: _nameController.text);
       ref.invalidate(petsListProvider);
+      if (!mounted) return;
+
+      final setNow = await showAppConfirmDialog(
+        context,
+        title: 'Set as active pet?',
+        message: 'Make "${pet.name}" your floating pet right now?',
+        confirmLabel: 'Set now',
+        cancelLabel: 'Not now',
+      );
+      if (setNow && mounted) {
+        await ref.read(overlayControllerProvider.notifier).selectPet(pet.id);
+      }
+
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } on AssetValidationFailure catch (e) {

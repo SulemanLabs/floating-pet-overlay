@@ -11,7 +11,6 @@ class SettingsLocalDataSource {
   static const _opacityKey = 'settings.opacity';
   static const _speedKey = 'settings.speed';
   static const _movementKey = 'settings.movement_enabled';
-  static const _soundKey = 'settings.sound_enabled';
   static const _autoStartKey = 'settings.auto_start_enabled';
 
   OverlaySettings read() {
@@ -20,7 +19,6 @@ class SettingsLocalDataSource {
       opacity: _storage.getDouble(_opacityKey) ?? AppConstants.defaultOpacity,
       speed: _storage.getDouble(_speedKey) ?? AppConstants.defaultSpeed,
       movementEnabled: _storage.getBool(_movementKey) ?? AppConstants.defaultMovementEnabled,
-      soundEnabled: _storage.getBool(_soundKey) ?? AppConstants.defaultSoundEnabled,
       autoStartEnabled: _storage.getBool(_autoStartKey) ?? AppConstants.defaultAutoStartEnabled,
     );
   }
@@ -30,7 +28,6 @@ class SettingsLocalDataSource {
     await _storage.setDouble(_opacityKey, settings.opacity);
     await _storage.setDouble(_speedKey, settings.speed);
     await _storage.setBool(_movementKey, settings.movementEnabled);
-    await _storage.setBool(_soundKey, settings.soundEnabled);
     await _storage.setBool(_autoStartKey, settings.autoStartEnabled);
   }
 }

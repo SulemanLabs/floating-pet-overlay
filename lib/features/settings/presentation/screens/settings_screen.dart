@@ -3,15 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_confirm_dialog.dart';
 import '../../../../core/widgets/app_section_header.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../overlay/presentation/providers/overlay_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Sign out?',
+      message: 'You\'ll need to sign in with Google again to use the app.',
+      confirmLabel: 'Sign out',
+      isDestructive: true,
+    );
+    if (confirmed) await signOut(ref);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final overlayAsync = ref.watch(overlayControllerProvider);
+    final user = ref.watch(authStateProvider).value;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -25,6 +39,32 @@ class SettingsScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(AppSpacing.base),
             children: [
+              if (user != null) ...[
+                const AppSectionHeader('Account'),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
+                          radius: 22,
+                          backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                          child: user.photoUrl == null ? const Icon(Icons.person_rounded) : null,
+                        ),
+                        title: Text(user.displayName ?? 'Signed in'),
+                        subtitle: user.email != null ? Text(user.email!) : null,
+                      ),
+                      const Divider(height: 1, indent: AppSpacing.base, endIndent: AppSpacing.base),
+                      ListTile(
+                        leading: Icon(Icons.logout_rounded, color: Theme.of(context).colorScheme.error),
+                        title: Text('Sign out', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                        onTap: () => _signOut(context, ref),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+              ],
               const AppSectionHeader('Appearance'),
               AppCard(
                 padding: EdgeInsets.zero,
@@ -94,13 +134,6 @@ class SettingsScreen extends ConsumerWidget {
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
-                    SwitchListTile(
-                      title: const Text('Sounds'),
-                      subtitle: const Text('Play sounds for pet reactions'),
-                      value: settings.soundEnabled,
-                      onChanged: (value) => controller.updateSettings((s) => s.copyWith(soundEnabled: value)),
-                    ),
-                    const Divider(height: 1, indent: AppSpacing.base, endIndent: AppSpacing.base),
                     SwitchListTile(
                       title: const Text('Start automatically'),
                       subtitle: const Text('Launch the floating pet when the device boots'),

@@ -7,6 +7,8 @@ import 'package:floating_streak/features/overlay/domain/repositories/overlay_rep
 import 'package:floating_streak/features/overlay/presentation/providers/overlay_providers.dart';
 import 'package:floating_streak/features/pets/domain/entities/pet_entity.dart';
 import 'package:floating_streak/features/settings/domain/entities/overlay_settings.dart';
+import 'package:floating_streak/features/settings/domain/repositories/settings_repository.dart';
+import 'package:floating_streak/features/settings/presentation/providers/settings_providers.dart';
 import 'package:floating_streak/features/streak/domain/entities/streak_entity.dart';
 import 'package:floating_streak/features/streak/domain/entities/streak_stats.dart';
 import 'package:floating_streak/features/streak/domain/repositories/streak_repository.dart';
@@ -114,12 +116,6 @@ class FakeOverlayRepository implements OverlayRepository {
   Future<void> requestOverlayPermission() async {}
 
   @override
-  Future<bool> isNotificationPermissionGranted() async => true;
-
-  @override
-  Future<bool> requestNotificationPermission() async => true;
-
-  @override
   Future<void> startOverlay({required PetEntity pet, required OverlaySettings settings}) async {}
 
   @override
@@ -147,6 +143,16 @@ class FakeOverlayRepository implements OverlayRepository {
   Future<void> syncNextDeadline(DateTime? deadline) async {}
 }
 
+class FakeSettingsRepository implements SettingsRepository {
+  OverlaySettings settings = const OverlaySettings();
+
+  @override
+  Future<OverlaySettings> getSettings() async => settings;
+
+  @override
+  Future<void> saveSettings(OverlaySettings settings) async => this.settings = settings;
+}
+
 void main() {
   late FakeStreakRepository fakeStreakRepository;
   late FakeOverlayRepository fakeOverlayRepository;
@@ -159,6 +165,7 @@ void main() {
       overrides: [
         streakRepositoryProvider.overrideWithValue(fakeStreakRepository),
         overlayRepositoryProvider.overrideWithValue(fakeOverlayRepository),
+        settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
       ],
     );
     addTearDown(container.dispose);

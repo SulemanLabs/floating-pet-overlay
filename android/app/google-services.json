@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "983539372258",
+    "project_id": "floatingstreak",
+    "storage_bucket": "floatingstreak.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983539372258:android:458aab3a8d096a9485cebb",
+        "android_client_info": {
+          "package_name": "com.sulemanlabs.floatingstreak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983539372258-oprcbus1hjdca276s2lrmgiv5f7c2a08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sulemanlabs.floatingstreak",
+            "certificate_hash": "9e91d3a9d634379cb7daaf649ad62dd6222d2ace"
+          }
+        },
+        {
+          "client_id": "983539372258-1v0ih60f57a09h842f27pp2dj03250ft.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_S90rUlJw8K1Fy07x_u87EE2-FGq5CNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983539372258-1v0ih60f57a09h842f27pp2dj03250ft.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

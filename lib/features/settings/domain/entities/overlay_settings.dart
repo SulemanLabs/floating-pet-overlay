@@ -8,7 +8,6 @@ class OverlaySettings {
     this.opacity = AppConstants.defaultOpacity,
     this.speed = AppConstants.defaultSpeed,
     this.movementEnabled = AppConstants.defaultMovementEnabled,
-    this.soundEnabled = AppConstants.defaultSoundEnabled,
     this.autoStartEnabled = AppConstants.defaultAutoStartEnabled,
   });
 
@@ -16,7 +15,6 @@ class OverlaySettings {
   final double opacity;
   final double speed;
   final bool movementEnabled;
-  final bool soundEnabled;
   final bool autoStartEnabled;
 
   OverlaySettings copyWith({
@@ -24,7 +22,6 @@ class OverlaySettings {
     double? opacity,
     double? speed,
     bool? movementEnabled,
-    bool? soundEnabled,
     bool? autoStartEnabled,
   }) {
     return OverlaySettings(
@@ -32,7 +29,6 @@ class OverlaySettings {
       opacity: _clamp(opacity ?? this.opacity, AppConstants.minOpacity, AppConstants.maxOpacity),
       speed: _clamp(speed ?? this.speed, AppConstants.minSpeed, AppConstants.maxSpeed),
       movementEnabled: movementEnabled ?? this.movementEnabled,
-      soundEnabled: soundEnabled ?? this.soundEnabled,
       autoStartEnabled: autoStartEnabled ?? this.autoStartEnabled,
     );
   }

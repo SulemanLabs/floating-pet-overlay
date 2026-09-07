@@ -6,7 +6,6 @@ class OverlayUiState {
   const OverlayUiState({
     required this.status,
     required this.overlayPermissionGranted,
-    required this.notificationPermissionGranted,
     required this.selectedPet,
     required this.settings,
     this.errorMessage,
@@ -14,7 +13,6 @@ class OverlayUiState {
 
   final OverlayStatus status;
   final bool overlayPermissionGranted;
-  final bool notificationPermissionGranted;
   final PetEntity selectedPet;
   final OverlaySettings settings;
   final String? errorMessage;
@@ -24,7 +22,6 @@ class OverlayUiState {
   OverlayUiState copyWith({
     OverlayStatus? status,
     bool? overlayPermissionGranted,
-    bool? notificationPermissionGranted,
     PetEntity? selectedPet,
     OverlaySettings? settings,
     String? errorMessage,
@@ -33,7 +30,6 @@ class OverlayUiState {
     return OverlayUiState(
       status: status ?? this.status,
       overlayPermissionGranted: overlayPermissionGranted ?? this.overlayPermissionGranted,
-      notificationPermissionGranted: notificationPermissionGranted ?? this.notificationPermissionGranted,
       selectedPet: selectedPet ?? this.selectedPet,
       settings: settings ?? this.settings,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),

@@ -158,9 +158,6 @@ class OverlayPlatformBridge {
     });
   }
 
-  Future<bool> isNotificationPermissionGranted() =>
-      _invoke<bool>(PlatformChannelConstants.methodIsNotificationPermissionGranted);
-
   /// Pushes the active streak's mode/status/timestamps so the native overlay
   /// can render its own badge (top pill, alongside the task deadline badge —
   /// see `StreakTicker.kt`) purely from timestamps, never a value Flutter has
@@ -182,9 +179,6 @@ class OverlayPlatformBridge {
   }
 
   Future<bool> clearStreak() => _invoke<bool>(PlatformChannelConstants.methodClearStreak);
-
-  Future<bool> requestNotificationPermission() =>
-      _invoke<bool>(PlatformChannelConstants.methodRequestNotificationPermission);
 
   void dispose() {
     _eventController.close();

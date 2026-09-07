@@ -1,12 +1,8 @@
 package com.sulemanlabs.floatingstreak
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,7 +21,6 @@ class MainActivity : FlutterActivity(), OverlayEventBridge.Listener {
 
     private var channel: MethodChannel? = null
     private var lastKnownOverlayPermission = false
-    private var pendingNotificationPermissionResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -73,8 +68,6 @@ class MainActivity : FlutterActivity(), OverlayEventBridge.Listener {
                 METHOD_REQUEST_OVERLAY_PERMISSION -> handleRequestOverlayPermission(result)
                 METHOD_IS_OVERLAY_PERMISSION_GRANTED -> result.success(isOverlayPermissionGranted())
                 METHOD_GET_OVERLAY_STATUS -> result.success(if (OverlayService.isRunning) "running" else "stopped")
-                METHOD_IS_NOTIFICATION_PERMISSION_GRANTED -> result.success(isNotificationPermissionGranted())
-                METHOD_REQUEST_NOTIFICATION_PERMISSION -> handleRequestNotificationPermission(result)
                 else -> result.notImplemented()
             }
         } catch (e: Exception) {
@@ -226,35 +219,7 @@ class MainActivity : FlutterActivity(), OverlayEventBridge.Listener {
         result.success(true)
     }
 
-    private fun handleRequestNotificationPermission(result: MethodChannel.Result) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || isNotificationPermissionGranted()) {
-            result.success(isNotificationPermissionGranted())
-            return
-        }
-        pendingNotificationPermissionResult = result
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-            REQUEST_CODE_NOTIFICATION_PERMISSION,
-        )
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_NOTIFICATION_PERMISSION) {
-            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            pendingNotificationPermissionResult?.success(granted)
-            pendingNotificationPermissionResult = null
-        }
-    }
-
     private fun isOverlayPermissionGranted(): Boolean = Settings.canDrawOverlays(this)
-
-    private fun isNotificationPermissionGranted(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-    }
 
     private fun sanitizedPetType(raw: Any?): String = (raw as? String)?.takeIf { it in VALID_PET_TYPES } ?: "emoji"
 
@@ -281,7 +246,6 @@ class MainActivity : FlutterActivity(), OverlayEventBridge.Listener {
 
     companion object {
         private const val CHANNEL = "com.floatingpet.overlay/control"
-        private const val REQUEST_CODE_NOTIFICATION_PERMISSION = 4201
         private val VALID_PET_TYPES = setOf("emoji", "image", "gif", "lottie")
 
         private const val METHOD_START_OVERLAY = "startOverlay"
@@ -298,8 +262,6 @@ class MainActivity : FlutterActivity(), OverlayEventBridge.Listener {
         private const val METHOD_REQUEST_OVERLAY_PERMISSION = "requestOverlayPermission"
         private const val METHOD_IS_OVERLAY_PERMISSION_GRANTED = "isOverlayPermissionGranted"
         private const val METHOD_GET_OVERLAY_STATUS = "getOverlayStatus"
-        private const val METHOD_IS_NOTIFICATION_PERMISSION_GRANTED = "isNotificationPermissionGranted"
-        private const val METHOD_REQUEST_NOTIFICATION_PERMISSION = "requestNotificationPermission"
 
         private const val EVENT_OVERLAY_STARTED = "overlayStarted"
         private const val EVENT_OVERLAY_STOPPED = "overlayStopped"

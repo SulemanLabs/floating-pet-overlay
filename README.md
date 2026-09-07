@@ -2,14 +2,16 @@
 
 A Flutter + Kotlin Android app that displays a draggable, auto-moving
 animated pet floating above other apps via a foreground service and
-`TYPE_APPLICATION_OVERLAY`.
+`TYPE_APPLICATION_OVERLAY` — and turns it into a habit/streak tracker: the
+pet's floating badge shows a live count-up or countdown streak, plus
+whichever task deadline is soonest.
 
-## What's implemented (Phase 1 — core loop, Phase 2 — custom pets, Phase 3 — task reminders)
+## What's implemented (Phase 1 — core loop, Phase 2 — custom pets, Phase 3 — task reminders, Phase 4 — streak tracking)
 
-- Flutter UI: Home, Pet Library, Settings, Overlay Permission screens
-  (Material 3, Riverpod, go_router).
+- Flutter UI: Home, Pet Library, Settings, Overlay Permission, Tasks, Streak,
+  and Streak History screens (Material 3, Riverpod, go_router).
 - Clean-architecture layering per feature (`domain` / `data` / `presentation`)
-  for `pets`, `settings`, `overlay`.
+  for `pets`, `settings`, `overlay`, `tasks`, `streak`.
 - A single bidirectional `MethodChannel`
   (`com.floatingpet.overlay/control`) — see
   `lib/core/constants/platform_channel_constants.dart` and `MainActivity.kt`,
@@ -84,12 +86,39 @@ animated pet floating above other apps via a foreground service and
     without the Dart VM running.
   - Home screen shows a one-line summary of the next deadline; the full list
     (add/complete/swipe-to-delete) lives on its own Tasks screen.
+- **Streak tracking**: the app's namesake feature, in `features/streak/`.
+  `StreakEntity` is timestamp-derived (open-ended count-up with no
+  `endDate`, or timed countdown to one) rather than a persisted tick count,
+  so elapsed/remaining time stays correct across restarts, backgrounding,
+  and device sleep:
+  - Start an open-ended or timed streak from the Streak screen; complete it
+    manually (open-ended) or let a timed one resolve on its own deadline;
+    break it explicitly. `StreakController` (Riverpod) is the single
+    authoritative state — Hive is the source of truth, and it's the only
+    thing that pushes streak state to native.
+  - `CheckStreakExpiration` runs on every cold start and whenever the app
+    resumes from the background (`_StreakLifecycleGate` in `app.dart`,
+    `AppLifecycleState.resumed`) — a timed streak's deadline may have passed
+    while the app wasn't running at all, and this is the only reliable place
+    to catch that (never a background timer).
+  - The floating overlay shows a live streak badge (`StreakTicker.kt`, same
+    1-second `Handler`-loop pattern as `DeadlineTicker`): 🔥 plus elapsed/
+    remaining time (`Nd HH:MM:SS`), ⏰ once a countdown streak enters its
+    final hour, and a brief self-clearing "Streak Complete"/"Streak Broken"
+    message on resolution — mirrored into `OverlayPrefs` so it survives a
+    service restart or reboot without the Dart VM running.
+  - Streak History screen lists past runs; the Streak screen also shows
+    aggregate stats (`StreakStats`) — total/completed/broken counts, current
+    elapsed time, longest actual duration (a broken streak still counts
+    toward "longest" — it's still the longest run the user sustained), and
+    success rate over resolved streaks.
 - Unit tests: settings clamping, pet repository (incl. JSON round-trip,
   add/delete, fallback-when-deleted), asset validation (real PNG decode via
   `dart:ui`, corrupted/empty/oversized/wrong-extension/malformed-Lottie-JSON
   rejection), task repository (add/update/delete, next-deadline selection),
-  deadline formatting, a Flutter widget smoke test with a mocked
-  `MethodChannel`.
+  streak repository/entity/stats (persistence round-trip, expiration,
+  overlay sync), deadline formatting, a Flutter widget smoke test with a
+  mocked `MethodChannel`.
 
 ## Deliberately deferred (follow-up work)
 
@@ -125,12 +154,17 @@ lib/
                     the OverlayController that ties pets+settings+bridge together
     tasks/         domain/data/presentation — task list; TaskController pushes
                     the nearest incomplete deadline to the overlay on every change
-android/app/src/main/kotlin/com/floatingpet/overlay/
+    streak/        domain/data/presentation — streak start/complete/break/history/
+                    stats; StreakController is the single authoritative state and
+                    pushes current/terminal streak snapshots to the overlay
+android/app/src/main/kotlin/com/sulemanlabs/floatingstreak/
   MainActivity.kt              MethodChannel host, permission handling
   OverlayService.kt            foreground service, owns the window lifecycle
   OverlayWindowManager.kt      WindowManager + LayoutParams + drag/position
   MovementController.kt        auto-wander/bounce loop
   DeadlineTicker.kt            1s countdown/urgency loop for the active task deadline
+  StreakTicker.kt              1s loop driving the overlay's streak badge (elapsed/
+                                remaining time, warning glyph, terminal message)
   PetOverlayView.kt            the pet's View: drawing, touch/gesture handling,
                                 and Drawable.Callback hosting for animated content
   PetRenderer.kt                decodes image/GIF/Lottie content off the main
@@ -201,8 +235,8 @@ flutter emulators --launch pixel_test
     crash the app.
 14. **Delete custom pet**: long-press a custom pet in the library, confirm
     the delete dialog, confirm it's gone from the grid and its file is gone
-    from `<app files>/pets/` (`adb shell run-as com.floatingpet.overlay ls
-    files/pets`).
+    from `<app files>/pets/` (`adb shell run-as com.sulemanlabs.floatingstreak
+    ls files/pets`).
 15. **Corrupted/missing asset**: delete a custom pet's file directly via adb
     (bypassing the app's own delete flow) while it's still listed as a pet,
     then select it and start the overlay — `PetRenderer` should fail the
@@ -226,6 +260,24 @@ flutter emulators --launch pixel_test
 20. **Countdown across reboot**: with auto-start and an active task deadline
     both set, reboot the device — the countdown/urgency state should be
     correct as soon as the overlay reappears.
+21. **Streak badge — open-ended**: start an open-ended streak, confirm the
+    overlay badge shows 🔥 and an elapsed clock that ticks up live; complete
+    it manually and confirm a brief "Streak Complete" message, then the
+    badge self-clears.
+22. **Streak badge — timed**: start a timed streak a few minutes out;
+    confirm the badge counts down, switches to ⏰ inside the final hour, and
+    shows "Streak Complete" once it naturally resolves at the deadline.
+23. **Streak broken**: start a streak, then use "Break Streak"; confirm the
+    badge briefly shows "Streak Broken" and self-clears, and the run appears
+    in Streak History as broken.
+24. **Streak expiration on resume**: start a short timed streak, background
+    the app (or kill it) until after the deadline passes, then reopen it —
+    the streak should already show resolved/expired without needing a manual
+    refresh, both in the UI and on the overlay badge.
+25. **Streak survives restart/reboot**: with an active streak, stop and
+    restart the overlay (and separately, reboot the device with auto-start
+    enabled) — the badge should resume immediately from `OverlayPrefs`, not
+    reset to "no streak" and wait for Dart to resync it.
 
 ## Release build
 
@@ -288,7 +340,7 @@ storage is local).
 
 ## Production-readiness checklist
 
-- [x] Compiles clean: `flutter analyze` (0 issues), `flutter test` (34/34
+- [x] Compiles clean: `flutter analyze` (0 issues), `flutter test` (92/92
       assertions passing), `flutter build apk --debug` (succeeds, Lottie
       dependency included).
 - [x] No deprecated overlay APIs (`TYPE_APPLICATION_OVERLAY` only, minSdk 26
@@ -309,13 +361,19 @@ storage is local).
 - [x] Task deadline state mirrored into native storage exactly like
       settings/position, so the countdown survives a service restart or
       reboot without depending on the Dart VM.
+- [x] Streak state (mode/status/start/end) mirrored into native storage the
+      same way, so the overlay badge survives a service restart or reboot;
+      expiration is re-checked on every cold start and app resume, never a
+      background timer.
 - [ ] Reaction system beyond deadlines (battery/lock-screen events), sound
       playback, custom emoji picker, due-time notifications — see
       "Deliberately deferred" above.
 - [ ] Manual device testing checklist above — not yet run against a
       physical device in this environment (none was attached); needs a real
-      run before shipping, especially items 11–20 (custom import/rendering,
-      task deadline countdown/urgency).
+      run before shipping, especially items 11–25 (custom import/rendering,
+      task deadline countdown/urgency, streak badge behavior).
+- [ ] No signed release keystore generated yet (`android/key.properties` is
+      absent) — `flutter build apk --release` currently falls back to debug
+      signing; generate one before shipping (see "Release build" above).
 - [ ] Play Store data-safety form / permissions declaration for
       `SYSTEM_ALERT_WINDOW` — not filed (no Play Console access here).
-# floating-pet-overlay

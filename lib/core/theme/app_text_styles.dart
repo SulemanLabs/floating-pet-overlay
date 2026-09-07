@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
@@ -15,7 +14,14 @@ abstract final class AppTextStyles {
     double letterSpacing = 0,
     double height = 1.4,
   }) =>
-      GoogleFonts.plusJakartaSans(fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: letterSpacing);
+      TextStyle(
+        fontFamily: 'Plus Jakarta Sans',
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        height: height,
+        letterSpacing: letterSpacing,
+      );
 
   static TextTheme textTheme(Brightness brightness) {
     final primary = brightness == Brightness.dark ? AppColors.darkTextPrimary : AppColors.textPrimary;

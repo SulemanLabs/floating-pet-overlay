@@ -11,10 +11,6 @@ abstract class OverlayRepository {
 
   Future<void> requestOverlayPermission();
 
-  Future<bool> isNotificationPermissionGranted();
-
-  Future<bool> requestNotificationPermission();
-
   Future<void> startOverlay({required PetEntity pet, required OverlaySettings settings});
 
   Future<void> stopOverlay();

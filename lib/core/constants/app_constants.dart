@@ -17,9 +17,14 @@ class AppConstants {
   static const double maxSpeed = 1.0;
   static const double defaultSpeed = 0.5;
 
-  static const bool defaultMovementEnabled = true;
-  static const bool defaultSoundEnabled = true;
+  static const bool defaultMovementEnabled = false;
   static const bool defaultAutoStartEnabled = false;
 
   static const String defaultPetId = 'builtin_cat';
+
+  // Local storage key for the one-time onboarding flag — shared between the
+  // onboarding feature (which writes it) and the router (which reads it
+  // directly off Hive to decide the initial route, before any provider
+  // machinery is available).
+  static const String onboardingCompletedKey = 'onboarding.completed';
 }

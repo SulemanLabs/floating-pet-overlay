@@ -19,12 +19,6 @@ class OverlayRepositoryImpl implements OverlayRepository {
   Future<void> requestOverlayPermission() => _bridge.requestOverlayPermission();
 
   @override
-  Future<bool> isNotificationPermissionGranted() => _bridge.isNotificationPermissionGranted();
-
-  @override
-  Future<bool> requestNotificationPermission() => _bridge.requestNotificationPermission();
-
-  @override
   Future<void> startOverlay({required PetEntity pet, required OverlaySettings settings}) {
     return _bridge.startOverlay(
       petType: pet.type.name,

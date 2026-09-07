@@ -18,8 +18,6 @@ class PlatformChannelConstants {
   static const String methodRequestOverlayPermission = 'requestOverlayPermission';
   static const String methodIsOverlayPermissionGranted = 'isOverlayPermissionGranted';
   static const String methodGetOverlayStatus = 'getOverlayStatus';
-  static const String methodIsNotificationPermissionGranted = 'isNotificationPermissionGranted';
-  static const String methodRequestNotificationPermission = 'requestNotificationPermission';
   static const String methodSyncNextDeadline = 'syncNextDeadline';
   static const String methodUpdateStreak = 'updateStreak';
   static const String methodClearStreak = 'clearStreak';

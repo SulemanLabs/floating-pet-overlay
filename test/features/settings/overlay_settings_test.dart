@@ -27,12 +27,11 @@ void main() {
     });
 
     test('leaves untouched fields unchanged', () {
-      const settings = OverlaySettings(movementEnabled: false, soundEnabled: false, autoStartEnabled: true);
+      const settings = OverlaySettings(movementEnabled: false, autoStartEnabled: true);
 
       final updated = settings.copyWith(opacity: 0.5);
 
       expect(updated.movementEnabled, false);
-      expect(updated.soundEnabled, false);
       expect(updated.autoStartEnabled, true);
     });
   });
